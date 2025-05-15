@@ -19,13 +19,15 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	// Commit Ability 
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
+		// Add Log
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
-
+	// No valid character
 	ACharacter* Character = Cast<ACharacter>(ActorInfo->AvatarActor);
 	if (Character == nullptr)
 	{
+		// Add Log
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
@@ -45,14 +47,25 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		Character->LaunchCharacter(LaunchVelocityVector, true, true);
 	}
 
+	// Avoid having the ability always active
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
 
 void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult)
 {
-	FVector TraceStart = Character->GetActorLocation();
-	FVector ForwardLocation = Character->GetActorForwardVector();
-	FVector TraceEnd = TraceStart + (ForwardLocation * HookMaxDistance); 
+	APlayerController* PC = Cast<APlayerController>(Character->GetController());
+	if (PC == nullptr)
+	{
+		return;
+	}
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+	FVector TraceStart = CameraLocation;
+	FVector Direction = CameraRotation.Vector();
+	FVector TraceEnd = TraceStart + (Direction * HookMaxDistance);
 
 	// Ignore the character performing the trace
 	FCollisionQueryParams QueryParams;

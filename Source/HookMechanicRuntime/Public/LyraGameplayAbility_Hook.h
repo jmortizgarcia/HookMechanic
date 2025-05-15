@@ -33,7 +33,7 @@ protected:
 	
 	// Hook max distance that will be able to reach in cm
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	float HookMaxDistance = 700.f;
+	float HookMaxDistance = 1500.f;
 	
 	// Hook launch speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
