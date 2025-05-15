@@ -2,11 +2,11 @@
 
 
 #include "LyraGameplayAbility_Hook.h"
-//#include "AbilitySystem/Abilities/LyraGameplayAbility.h"
 
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "AbilitySystemGlobals.h"
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -48,22 +48,11 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
 
-bool ULyraGameplayAbility_Hook::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
-{
-	bool bCanActivate = Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
-	return bCanActivate;
-}
-
-void ULyraGameplayAbility_Hook::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
-{
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
 void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult)
 {
 	FVector TraceStart = Character->GetActorLocation();
 	FVector ForwardLocation = Character->GetActorForwardVector();
-	FVector TraceEnd = TraceStart + (ForwardLocation * HookMaxDistance); // MAX DISTANCE OF HOOK CHANGE TO UPROPERTY
+	FVector TraceEnd = TraceStart + (ForwardLocation * HookMaxDistance); 
 
 	// Ignore the character performing the trace
 	FCollisionQueryParams QueryParams;
