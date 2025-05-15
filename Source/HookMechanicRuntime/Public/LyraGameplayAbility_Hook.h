@@ -29,6 +29,9 @@ protected:
 	// Performs Hit trace for hook
 	void PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult);
 
+	// Callback when hook task is completed
+	UFUNCTION()
+	void OnHookCompleted();
 protected:
 	
 	// Hook max distance that will be able to reach in cm

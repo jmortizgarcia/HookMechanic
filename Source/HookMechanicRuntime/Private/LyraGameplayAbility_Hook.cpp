@@ -8,6 +8,8 @@
 #include "Engine/World.h"
 #include "AbilitySystemGlobals.h"
 
+#include "AbilityTask_HookMove.h"
+
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
@@ -35,20 +37,23 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	// Perform hook targeting to launch character
 	FHitResult HookHit;
 	PerformHookTrace(Character, HookHit);
-
-	// Launch character to hook point
-	if (HookHit.bBlockingHit)
+	
+	// Not valid hook point 
+	if (HookHit.bBlockingHit== false)
 	{
-		FVector HookTargetLocation = HookHit.Location;
-		FVector CharacterLocation = Character->GetActorLocation();
-		// Launch Character 
-		FVector Direction = (HookTargetLocation - CharacterLocation).GetSafeNormal();
-		FVector LaunchVelocityVector = Direction * HookLaunchSpeed;
-		Character->LaunchCharacter(LaunchVelocityVector, true, true);
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+		return;
 	}
 
-	// Avoid having the ability always active
-	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	//Hook Task 
+	float HookSpeed = 2500.0f;
+	float StopDistance = 100.0f;
+	UAbilityTask_HookMove* HookTask = UAbilityTask_HookMove::HookMove(this, FName("HookMove"), Character, HookHit.Location, HookSpeed, StopDistance);
+	
+	HookTask->OnHookFinish.AddDynamic(this, &ThisClass::OnHookCompleted);
+	
+	HookTask->ReadyForActivation();
+	
 }
 
 void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult)
@@ -80,4 +85,9 @@ void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResu
 	{
 		DrawDebugSphere(GetWorld(), OutHitResult.Location, 10.0f, 12, FColor::Red, false, 2.0f);
 	}
+}
+
+void ULyraGameplayAbility_Hook::OnHookCompleted()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
