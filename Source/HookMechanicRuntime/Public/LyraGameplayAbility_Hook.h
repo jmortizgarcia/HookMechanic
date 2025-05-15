@@ -2,7 +2,7 @@
 
 #pragma once
 
-//#include "CoreMinimal.h"
+#include "CoreMinimal.h"
 
 #include "AbilitySystem/Abilities/LyraGameplayAbility.h"
 
@@ -13,7 +13,7 @@
  *
  *	Gameplay ability used for Hook into a wall.
  */
-UCLASS(Abstract)
+UCLASS()
 class HOOKMECHANICRUNTIME_API ULyraGameplayAbility_Hook : public ULyraGameplayAbility
 {
 	GENERATED_BODY()
@@ -31,4 +31,8 @@ protected:
 
 	// Ends Ability
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
+
+	// Performs Hit trace for hook
+	void PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult);
+
 };
