@@ -41,7 +41,7 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		FVector CharacterLocation = Character->GetActorLocation();
 		// Launch Character 
 		FVector Direction = (HookTargetLocation - CharacterLocation).GetSafeNormal();
-		FVector LaunchVelocityVector = Direction * 500;  // HOOK LAUNCH VELOCITY CHANGE TO UPROPERTY
+		FVector LaunchVelocityVector = Direction * HookLaunchSpeed;
 		Character->LaunchCharacter(LaunchVelocityVector, true, true);
 	}
 
@@ -63,7 +63,7 @@ void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResu
 {
 	FVector TraceStart = Character->GetActorLocation();
 	FVector ForwardLocation = Character->GetActorForwardVector();
-	FVector TraceEnd = TraceStart + (ForwardLocation * 1000.f); // MAX DISTANCE OF HOOK CHANGE TO UPROPERTY
+	FVector TraceEnd = TraceStart + (ForwardLocation * HookMaxDistance); // MAX DISTANCE OF HOOK CHANGE TO UPROPERTY
 
 	// Ignore the character performing the trace
 	FCollisionQueryParams QueryParams;

@@ -35,4 +35,13 @@ protected:
 	// Performs Hit trace for hook
 	void PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult);
 
+protected:
+	
+	// Hook max distance that will be able to reach in cm
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	float HookMaxDistance = 700.f;
+	
+	// Hook launch speed
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	float HookLaunchSpeed = 1000.f;
 };
