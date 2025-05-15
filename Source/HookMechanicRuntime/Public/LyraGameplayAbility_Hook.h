@@ -40,5 +40,9 @@ protected:
 	
 	// Hook launch speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	float HookLaunchSpeed = 1000.f;
+	float HookSpeed = 1000.f;
+	
+	// Hook launch speed
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	float HookToleranceStop = 100.f;
 };

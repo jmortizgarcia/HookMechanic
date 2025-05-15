@@ -46,9 +46,7 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	}
 
 	//Hook Task 
-	float HookSpeed = 2500.0f;
-	float StopDistance = 100.0f;
-	UAbilityTask_HookMove* HookTask = UAbilityTask_HookMove::HookMove(this, FName("HookMove"), Character, HookHit.Location, HookSpeed, StopDistance);
+	UAbilityTask_HookMove* HookTask = UAbilityTask_HookMove::HookMove(this, FName("HookMove"), Character, HookHit.Location, HookSpeed, HookToleranceStop);
 	
 	HookTask->OnHookFinish.AddDynamic(this, &ThisClass::OnHookCompleted);
 	
