@@ -9,8 +9,7 @@
 #include "AbilitySystemGlobals.h"
 
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
-#include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
-
+#include "Abilities/Tasks/AbilityTask_ApplyRootMotionMoveToForce.h"
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -50,14 +49,17 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	// Direction
-	FVector Direction = (HookHit.Location - Character->GetActorLocation()).GetSafeNormal();
+	// Calculations to mantain momentum
+	//FVector Direction = (HookHit.Location - Character->GetActorLocation()).GetSafeNormal();
 	float Distance = FVector::Dist(HookHit.Location, Character->GetActorLocation());
 	float Duration = Distance / HookMaxSpeed;
-	FVector VelocityOnFinish = Direction * HookMaxSpeed;
+	//FVector VelocityOnFinish = Direction * HookMaxSpeed;
 
-	UAbilityTask_ApplyRootMotionConstantForce* ApplyForceTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, FName(), Direction, HookStrength, Duration, bAdditiveForce, StrengthOverTime, ERootMotionFinishVelocityMode::SetVelocity, VelocityOnFinish, 0.f, bEnableGravityDuringHook);
-	ApplyForceTask->OnFinish.AddDynamic(this, &ThisClass::OnMoveCompleted);
+	// Hook task 
+	UAbilityTask_ApplyRootMotionMoveToForce* ApplyForceTask = UAbilityTask_ApplyRootMotionMoveToForce::ApplyRootMotionMoveToForce(this, FName(), HookHit.Location, Duration, true, EMovementMode::MOVE_Flying, true, PathOffsetCurve, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f);
+	// Bind task callbacks when reaching point
+	ApplyForceTask->OnTimedOut.AddDynamic(this, &ThisClass::OnMoveCompleted);
+	ApplyForceTask->OnTimedOutAndDestinationReached.AddDynamic(this, &ThisClass::OnMoveCompleted);
 	ApplyForceTask->ReadyForActivation();
 	
 	// Input Press Task to cancel again

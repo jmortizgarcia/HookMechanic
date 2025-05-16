@@ -14,6 +14,9 @@
  *	Gameplay ability used for Hook into something. The hook will move player towards the point till it reaches or cancels ability.
  * 
  */
+
+class UCurveVector;
+
 UCLASS()
 class HOOKMECHANICRUNTIME_API ULyraGameplayAbility_Hook : public ULyraGameplayAbility
 {
@@ -55,22 +58,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
 	float HookToleranceStop = 100.f;
 
-	// Hook Force Strength 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	float HookStrength = 1000.f;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	float HookDuration = 1.f;
-
-	// if this will be the only force to move the character mark as false, if true takes into account other forces. 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	bool bAdditiveForce = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	bool bEnableGravityDuringHook = false;
-
 	// Force curve 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	TObjectPtr<UCurveFloat> StrengthOverTime;
-
+	TObjectPtr<UCurveVector> PathOffsetCurve;
 };
