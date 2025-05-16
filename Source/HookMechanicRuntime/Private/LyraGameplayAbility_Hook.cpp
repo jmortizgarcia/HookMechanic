@@ -9,7 +9,9 @@
 #include "AbilitySystemGlobals.h"
 
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
-#include "Abilities/Tasks/AbilityTask_ApplyRootMotionMoveToForce.h"
+#include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -49,23 +51,21 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	// Calculations to mantain momentum
-	//FVector Direction = (HookHit.Location - Character->GetActorLocation()).GetSafeNormal();
+	// Calculations 
+	FVector Direction = (HookHit.Location - Character->GetActorLocation()).GetSafeNormal();
 	float Distance = FVector::Dist(HookHit.Location, Character->GetActorLocation());
 	float Duration = Distance / HookMaxSpeed;
-	//FVector VelocityOnFinish = Direction * HookMaxSpeed;
 
-	// Hook task 
-	UAbilityTask_ApplyRootMotionMoveToForce* ApplyForceTask = UAbilityTask_ApplyRootMotionMoveToForce::ApplyRootMotionMoveToForce(this, FName(), HookHit.Location, Duration, true, EMovementMode::MOVE_Flying, true, PathOffsetCurve, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f);
-	// Bind task callbacks when reaching point
-	ApplyForceTask->OnTimedOut.AddDynamic(this, &ThisClass::OnMoveCompleted);
-	ApplyForceTask->OnTimedOutAndDestinationReached.AddDynamic(this, &ThisClass::OnMoveCompleted);
+	// Task to launch character
+	UAbilityTask_ApplyRootMotionConstantForce* ApplyForceTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, FName("HookForce"), Direction, HookMaxSpeed, Duration, false, nullptr, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f, false);
+	ApplyForceTask->OnFinish.AddDynamic(this, &ThisClass::OnMoveCompleted);
 	ApplyForceTask->ReadyForActivation();
 	
 	// Input Press Task to cancel again
 	UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
 	WaitInputPressTask->OnPress.AddDynamic(this, &ThisClass::OnInputPressed);
 	WaitInputPressTask->ReadyForActivation();
+
 }
 
 void ULyraGameplayAbility_Hook::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
@@ -115,4 +115,9 @@ void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
 	{
 		CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 	}
+}
+
+void ULyraGameplayAbility_Hook::OnMontageEnded()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }

@@ -15,7 +15,7 @@
  * 
  */
 
-class UCurveVector;
+class UCurveFloat;
 
 UCLASS()
 class HOOKMECHANICRUNTIME_API ULyraGameplayAbility_Hook : public ULyraGameplayAbility
@@ -45,7 +45,6 @@ protected:
 	void OnInputPressed(float TimePassed);
 
 protected:
-	
 	// Hook max distance that will be able to reach in cm
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
 	float HookMaxDistance = 1500.f;
@@ -53,12 +52,4 @@ protected:
 	// Hook launch speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
 	float HookMaxSpeed = 1000.f;
-	
-	// Hook launch speed
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	float HookToleranceStop = 100.f;
-
-	// Force curve 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	TObjectPtr<UCurveVector> PathOffsetCurve;
 };
