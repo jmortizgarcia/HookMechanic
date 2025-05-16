@@ -18,6 +18,8 @@ ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& O
 
 void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
 	// Commit Ability 
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
@@ -41,17 +43,20 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	// Not valid hook point 
 	if (HookHit.bBlockingHit== false)
 	{
+		// Add Log
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
 
 	//Hook Task 
 	UAbilityTask_HookMove* HookTask = UAbilityTask_HookMove::HookMove(this, FName("HookMove"), Character, HookHit.Location, HookSpeed, HookToleranceStop);
-	
 	HookTask->OnHookFinish.AddDynamic(this, &ThisClass::OnHookCompleted);
-	
-	HookTask->ReadyForActivation();
-	
+	HookTask->ReadyForActivation();	
+}
+
+void ULyraGameplayAbility_Hook::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
+{
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 }
 
 void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult)

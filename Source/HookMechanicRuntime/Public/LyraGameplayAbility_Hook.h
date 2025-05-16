@@ -11,7 +11,8 @@
 /**
  * ULyraGameplayAbility_Hook
  *
- *	Gameplay ability used for Hook into a wall.
+ *	Gameplay ability used for Hook into something. The hook will move player towards the point till it reaches or cancels ability.
+ * 
  */
 UCLASS()
 class HOOKMECHANICRUNTIME_API ULyraGameplayAbility_Hook : public ULyraGameplayAbility
@@ -25,6 +26,9 @@ protected:
 
 	// Activates ability 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+	
+	// Cancel abilty
+	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
 
 	// Performs Hit trace for hook
 	void PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult);
@@ -32,6 +36,7 @@ protected:
 	// Callback when hook task is completed
 	UFUNCTION()
 	void OnHookCompleted();
+
 protected:
 	
 	// Hook max distance that will be able to reach in cm
