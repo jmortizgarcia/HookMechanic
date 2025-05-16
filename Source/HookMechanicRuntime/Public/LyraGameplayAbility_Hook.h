@@ -35,7 +35,7 @@ protected:
 
 	// Callback when hook task is completed
 	UFUNCTION()
-	void OnHookCompleted();
+	void OnMoveCompleted();
 
 	// Callback when input press 
 	UFUNCTION()
@@ -49,9 +49,28 @@ protected:
 	
 	// Hook launch speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
-	float HookSpeed = 1000.f;
+	float HookMaxSpeed = 1000.f;
 	
 	// Hook launch speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
 	float HookToleranceStop = 100.f;
+
+	// Hook Force Strength 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	float HookStrength = 1000.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	float HookDuration = 1.f;
+
+	// if this will be the only force to move the character mark as false, if true takes into account other forces. 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	bool bAdditiveForce = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	bool bEnableGravityDuringHook = false;
+
+	// Force curve 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
+	TObjectPtr<UCurveFloat> StrengthOverTime;
+
 };

@@ -8,8 +8,9 @@
 #include "Engine/World.h"
 #include "AbilitySystemGlobals.h"
 
-#include "AbilityTask_HookMove.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
+#include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
+
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -49,11 +50,16 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	//Hook Task 
-	UAbilityTask_HookMove* HookTask = UAbilityTask_HookMove::HookMove(this, FName("HookMove"), Character, HookHit.Location, HookSpeed, HookToleranceStop);
-	HookTask->OnHookFinish.AddDynamic(this, &ThisClass::OnHookCompleted);
-	HookTask->ReadyForActivation();	
+	// Direction
+	FVector Direction = (HookHit.Location - Character->GetActorLocation()).GetSafeNormal();
+	float Distance = FVector::Dist(HookHit.Location, Character->GetActorLocation());
+	float Duration = Distance / HookMaxSpeed;
+	FVector VelocityOnFinish = Direction * HookMaxSpeed;
 
+	UAbilityTask_ApplyRootMotionConstantForce* ApplyForceTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, FName(), Direction, HookStrength, Duration, bAdditiveForce, StrengthOverTime, ERootMotionFinishVelocityMode::SetVelocity, VelocityOnFinish, 0.f, bEnableGravityDuringHook);
+	ApplyForceTask->OnFinish.AddDynamic(this, &ThisClass::OnMoveCompleted);
+	ApplyForceTask->ReadyForActivation();
+	
 	// Input Press Task to cancel again
 	UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
 	WaitInputPressTask->OnPress.AddDynamic(this, &ThisClass::OnInputPressed);
@@ -96,7 +102,7 @@ void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResu
 	}
 }
 
-void ULyraGameplayAbility_Hook::OnHookCompleted()
+void ULyraGameplayAbility_Hook::OnMoveCompleted()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
