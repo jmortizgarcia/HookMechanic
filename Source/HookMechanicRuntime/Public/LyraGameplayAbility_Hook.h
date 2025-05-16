@@ -37,6 +37,10 @@ protected:
 	UFUNCTION()
 	void OnHookCompleted();
 
+	// Callback when input press 
+	UFUNCTION()
+	void OnInputPressed(float TimePassed);
+
 protected:
 	
 	// Hook max distance that will be able to reach in cm

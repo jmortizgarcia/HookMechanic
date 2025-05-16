@@ -53,3 +53,8 @@ void UAbilityTask_HookMove::TickTask(float DeltaTime)
 
 	CharacterPtr->SetActorLocation(NewLocation);
 }
+
+void UAbilityTask_HookMove::OnDestroy(bool AbilityIsEnding)
+{
+	Super::OnDestroy(AbilityIsEnding);
+}

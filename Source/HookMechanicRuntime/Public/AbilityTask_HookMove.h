@@ -27,6 +27,9 @@ public:
 	/** Tick function for this task, if bTickingTask == true */
 	virtual void TickTask(float DeltaTime) override;
 
+	// Ability Cancel or Ended
+	virtual void OnDestroy(bool AbilityIsEnding) override;
+
 public:
 	FHookMoveFinish OnHookFinish;
 

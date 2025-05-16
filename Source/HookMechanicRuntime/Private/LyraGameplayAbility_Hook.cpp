@@ -9,6 +9,7 @@
 #include "AbilitySystemGlobals.h"
 
 #include "AbilityTask_HookMove.h"
+#include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -52,6 +53,11 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	UAbilityTask_HookMove* HookTask = UAbilityTask_HookMove::HookMove(this, FName("HookMove"), Character, HookHit.Location, HookSpeed, HookToleranceStop);
 	HookTask->OnHookFinish.AddDynamic(this, &ThisClass::OnHookCompleted);
 	HookTask->ReadyForActivation();	
+
+	// Input Press Task to cancel again
+	UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
+	WaitInputPressTask->OnPress.AddDynamic(this, &ThisClass::OnInputPressed);
+	WaitInputPressTask->ReadyForActivation();
 }
 
 void ULyraGameplayAbility_Hook::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
@@ -93,4 +99,12 @@ void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResu
 void ULyraGameplayAbility_Hook::OnHookCompleted()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+}
+
+void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
+{
+	if (IsActive())
+	{
+		CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+	}
 }
