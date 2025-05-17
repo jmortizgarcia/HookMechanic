@@ -47,7 +47,8 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	}
 
 	// Perform hook targeting to launch character only in Server 
-	if (AbilitySystem && AbilitySystem->GetOwnerRole() == ROLE_Authority)
+	if (ActorInfo->IsNetAuthority())
+	//if (AbilitySystem && AbilitySystem->GetOwnerRole() == ROLE_Authority)
 	{
 		FHitResult HookHit;
 		PerformHookTrace(Character, HookHit);
@@ -69,6 +70,9 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		UAbilityTask_ApplyRootMotionConstantForce* ApplyForceTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, FName("HookForce"), Direction, HookMaxSpeed, Duration, false, nullptr, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f, false);
 		ApplyForceTask->OnFinish.AddDynamic(this, &ThisClass::OnMoveCompleted);
 		ApplyForceTask->ReadyForActivation();
+
+		// Client
+		Client_PerformHookMovement(HookHit.Location);
 	}
 
 	// Input Press Task to cancel again only Locally Controlled 
@@ -139,8 +143,27 @@ void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
 			auto ROLE = AbilitySystem->GetOwnerRole();
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15.f, FColor::Green, FString::Printf(TEXT("Cancelando la ability del gancho volver a apretar input: [%s]"), *UEnum::GetDisplayValueAsText(ROLE).ToString()));
 		}
-		//CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 	
 	}
+}
+
+void ULyraGameplayAbility_Hook::Client_TEST_Implementation(const FVector& Location)
+{
+	ACharacter* Character = Cast<ACharacter>(CurrentActorInfo->AvatarActor);
+	if (Character == nullptr)
+	{
+		// Add Log
+		return;
+	}
+
+	// Calculations 
+	FVector Direction = (Location - Character->GetActorLocation()).GetSafeNormal();
+	float Distance = FVector::Dist(Location, Character->GetActorLocation());
+	float Duration = Distance / HookMaxSpeed;
+
+	// Task to launch character
+	UAbilityTask_ApplyRootMotionConstantForce* ApplyForceTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, FName("HookForce"), Direction, HookMaxSpeed, Duration, false, nullptr, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f, false);
+	ApplyForceTask->OnFinish.AddDynamic(this, &ThisClass::OnMoveCompleted);
+	ApplyForceTask->ReadyForActivation();
 }

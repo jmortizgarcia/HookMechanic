@@ -42,6 +42,9 @@ protected:
 	UFUNCTION()
 	void OnInputPressed(float TimePassed);
 
+	UFUNCTION(Client, Reliable)
+	void Client_PerformHookMovement(const FVector& Location);
+
 protected:
 	// Hook max distance that will be able to reach in cm
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
