@@ -125,7 +125,7 @@ void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
 	}
 }
 
-void ULyraGameplayAbility_Hook::Client_TEST_Implementation(const FVector& Location)
+void ULyraGameplayAbility_Hook::Client_PerformHookMovement_Implementation(const FVector& Location)
 {
 	ACharacter* Character = Cast<ACharacter>(CurrentActorInfo->AvatarActor);
 	if (Character == nullptr)
