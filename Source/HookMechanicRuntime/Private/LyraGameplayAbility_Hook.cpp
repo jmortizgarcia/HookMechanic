@@ -127,6 +127,8 @@ void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
 
 void ULyraGameplayAbility_Hook::Client_PerformHookMovement_Implementation(const FVector& Location)
 {
+
+
 	ACharacter* Character = Cast<ACharacter>(CurrentActorInfo->AvatarActor);
 	if (Character == nullptr)
 	{
@@ -134,6 +136,10 @@ void ULyraGameplayAbility_Hook::Client_PerformHookMovement_Implementation(const 
 		return;
 	}
 
+	// Draw Hook in client
+	FHitResult HitResult;
+	PerformHookTrace(Character, HitResult);
+	
 	// Calculations 
 	FVector Direction = (Location - Character->GetActorLocation()).GetSafeNormal();
 	float Distance = FVector::Dist(Location, Character->GetActorLocation());
