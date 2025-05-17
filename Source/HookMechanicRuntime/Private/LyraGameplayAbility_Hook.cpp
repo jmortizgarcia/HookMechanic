@@ -11,7 +11,6 @@
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
-#include "AbilitySystemComponent.h"
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -22,13 +21,6 @@ ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& O
 void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
-	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponentFromActorInfo();
-	if (AbilitySystem)
-	{
-		auto ROLE = AbilitySystem->GetOwnerRole();
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15.f, FColor::Orange, FString::Printf(TEXT("Activando Gancho siendo: [%s]"), *UEnum::GetDisplayValueAsText(ROLE).ToString()));
-	}
 
 	// Commit Ability 
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
@@ -48,7 +40,6 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 
 	// Perform hook targeting to launch character only in Server 
 	if (ActorInfo->IsNetAuthority())
-	//if (AbilitySystem && AbilitySystem->GetOwnerRole() == ROLE_Authority)
 	{
 		FHitResult HookHit;
 		PerformHookTrace(Character, HookHit);
@@ -88,13 +79,6 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 void ULyraGameplayAbility_Hook::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
 {
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-
-	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponentFromActorInfo();
-	if (AbilitySystem)
-	{
-		auto ROLE = AbilitySystem->GetOwnerRole();
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15.f, FColor::Cyan, FString::Printf(TEXT("Cancelando la ability del gancho [%s]"), *UEnum::GetDisplayValueAsText(ROLE).ToString()));
-	}
 }
 
 void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult)
@@ -137,14 +121,7 @@ void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
 {
 	if (IsActive())
 	{
-		UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponentFromActorInfo();
-		if (AbilitySystem)
-		{
-			auto ROLE = AbilitySystem->GetOwnerRole();
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15.f, FColor::Green, FString::Printf(TEXT("Cancelando la ability del gancho volver a apretar input: [%s]"), *UEnum::GetDisplayValueAsText(ROLE).ToString()));
-		}
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
-	
 	}
 }
 
