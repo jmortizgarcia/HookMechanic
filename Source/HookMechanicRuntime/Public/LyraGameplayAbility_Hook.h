@@ -15,8 +15,6 @@
  * 
  */
 
-class UCurveFloat;
-
 UCLASS()
 class HOOKMECHANICRUNTIME_API ULyraGameplayAbility_Hook : public ULyraGameplayAbility
 {
@@ -52,4 +50,8 @@ protected:
 	// Hook launch speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
 	float HookMaxSpeed = 1000.f;
+
+	// Icon 
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook|HUD")
+	//TSubclassOf<UUserWidget> HookIcon;
 };

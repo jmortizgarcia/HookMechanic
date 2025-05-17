@@ -11,7 +11,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
-
+#include "AbilitySystemComponent.h"
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -22,6 +22,13 @@ ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& O
 void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponentFromActorInfo();
+	if (AbilitySystem)
+	{
+		auto ROLE = AbilitySystem->GetOwnerRole();
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15.f, FColor::Orange, FString::Printf(TEXT("Activando Gancho siendo: [%s]"), *UEnum::GetDisplayValueAsText(ROLE).ToString()));
+	}
 
 	// Commit Ability 
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
@@ -39,38 +46,51 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	// Perform hook targeting to launch character
-	FHitResult HookHit;
-	PerformHookTrace(Character, HookHit);
-	
-	// Not valid hook point 
-	if (HookHit.bBlockingHit== false)
+	// Perform hook targeting to launch character only in Server 
+	if (AbilitySystem && AbilitySystem->GetOwnerRole() == ROLE_Authority)
 	{
-		// Add Log
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-		return;
+		FHitResult HookHit;
+		PerformHookTrace(Character, HookHit);
+
+		// Not valid hook point 
+		if (HookHit.bBlockingHit == false)
+		{
+			// Add Log
+			EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+			return;
+		}
+
+		// Calculations 
+		FVector Direction = (HookHit.Location - Character->GetActorLocation()).GetSafeNormal();
+		float Distance = FVector::Dist(HookHit.Location, Character->GetActorLocation());
+		float Duration = Distance / HookMaxSpeed;
+
+		// Task to launch character
+		UAbilityTask_ApplyRootMotionConstantForce* ApplyForceTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, FName("HookForce"), Direction, HookMaxSpeed, Duration, false, nullptr, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f, false);
+		ApplyForceTask->OnFinish.AddDynamic(this, &ThisClass::OnMoveCompleted);
+		ApplyForceTask->ReadyForActivation();
 	}
 
-	// Calculations 
-	FVector Direction = (HookHit.Location - Character->GetActorLocation()).GetSafeNormal();
-	float Distance = FVector::Dist(HookHit.Location, Character->GetActorLocation());
-	float Duration = Distance / HookMaxSpeed;
-
-	// Task to launch character
-	UAbilityTask_ApplyRootMotionConstantForce* ApplyForceTask = UAbilityTask_ApplyRootMotionConstantForce::ApplyRootMotionConstantForce(this, FName("HookForce"), Direction, HookMaxSpeed, Duration, false, nullptr, ERootMotionFinishVelocityMode::MaintainLastRootMotionVelocity, FVector::ZeroVector, 0.f, false);
-	ApplyForceTask->OnFinish.AddDynamic(this, &ThisClass::OnMoveCompleted);
-	ApplyForceTask->ReadyForActivation();
-	
-	// Input Press Task to cancel again
-	UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
-	WaitInputPressTask->OnPress.AddDynamic(this, &ThisClass::OnInputPressed);
-	WaitInputPressTask->ReadyForActivation();
+	// Input Press Task to cancel again only Locally Controlled 
+	if(IsLocallyControlled())
+	{
+		UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
+		WaitInputPressTask->OnPress.AddDynamic(this, &ThisClass::OnInputPressed);
+		WaitInputPressTask->ReadyForActivation();
+	}	
 
 }
 
 void ULyraGameplayAbility_Hook::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
 {
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+
+	UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponentFromActorInfo();
+	if (AbilitySystem)
+	{
+		auto ROLE = AbilitySystem->GetOwnerRole();
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15.f, FColor::Cyan, FString::Printf(TEXT("Cancelando la ability del gancho [%s]"), *UEnum::GetDisplayValueAsText(ROLE).ToString()));
+	}
 }
 
 void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult)
@@ -113,11 +133,14 @@ void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
 {
 	if (IsActive())
 	{
-		CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+		UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponentFromActorInfo();
+		if (AbilitySystem)
+		{
+			auto ROLE = AbilitySystem->GetOwnerRole();
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 15.f, FColor::Green, FString::Printf(TEXT("Cancelando la ability del gancho volver a apretar input: [%s]"), *UEnum::GetDisplayValueAsText(ROLE).ToString()));
+		}
+		//CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
+		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
+	
 	}
-}
-
-void ULyraGameplayAbility_Hook::OnMontageEnded()
-{
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }
