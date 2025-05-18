@@ -7,10 +7,10 @@
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "AbilitySystemGlobals.h"
-
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Logging/LogMacros.h"
 
 ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& ObjectInitializer)
 {
@@ -24,6 +24,7 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	// Commit Ability 
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
+		UE_LOG(LogAbilitySystemComponent, Warning, TEXT("Not posible to commit Hook Ability!"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
@@ -31,6 +32,7 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	ACharacter* Character = Cast<ACharacter>(ActorInfo->AvatarActor);
 	if (Character == nullptr)
 	{
+		UE_LOG(LogAbilitySystemComponent, Warning, TEXT("Not valid character activating Hook Ability!"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
@@ -44,6 +46,7 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		// Not valid hook point 
 		if (HookHit.bBlockingHit == false)
 		{
+			UE_LOG(LogAbilitySystemComponent, Verbose, TEXT("Not valid hook point to reach!"));
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 			return;
 		}
@@ -72,16 +75,12 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 
 }
 
-void ULyraGameplayAbility_Hook::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
-{
-	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-}
-
 void ULyraGameplayAbility_Hook::PerformHookTrace(ACharacter* Character, FHitResult& OutHitResult)
 {
 	APlayerController* PC = Cast<APlayerController>(Character->GetController());
 	if (PC == nullptr)
 	{
+		UE_LOG(LogAbilitySystemComponent, Warning, TEXT("Not valid character Performing hook trace!"));
 		return;
 	}
 
@@ -126,6 +125,7 @@ void ULyraGameplayAbility_Hook::Client_PerformHookMovement_Implementation(const 
 	ACharacter* Character = Cast<ACharacter>(CurrentActorInfo->AvatarActor);
 	if (Character == nullptr)
 	{
+		UE_LOG(LogAbilitySystemComponent, Warning, TEXT("Not valid client character Performing hook trace!"));
 		return;
 	}
 
