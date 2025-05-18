@@ -21,11 +21,9 @@ ULyraGameplayAbility_Hook::ULyraGameplayAbility_Hook(const FObjectInitializer& O
 void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
 	// Commit Ability 
 	if(!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
-		// Add Log
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
@@ -33,7 +31,6 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 	ACharacter* Character = Cast<ACharacter>(ActorInfo->AvatarActor);
 	if (Character == nullptr)
 	{
-		// Add Log
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		return;
 	}
@@ -47,7 +44,6 @@ void ULyraGameplayAbility_Hook::ActivateAbility(const FGameplayAbilitySpecHandle
 		// Not valid hook point 
 		if (HookHit.bBlockingHit == false)
 		{
-			// Add Log
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 			return;
 		}
@@ -127,12 +123,9 @@ void ULyraGameplayAbility_Hook::OnInputPressed(float TimePassed)
 
 void ULyraGameplayAbility_Hook::Client_PerformHookMovement_Implementation(const FVector& Location)
 {
-
-
 	ACharacter* Character = Cast<ACharacter>(CurrentActorInfo->AvatarActor);
 	if (Character == nullptr)
 	{
-		// Add Log
 		return;
 	}
 

@@ -14,6 +14,7 @@
  *	Gameplay ability used for Hook into something. The hook will move player towards the point till it reaches or cancels ability.
  * 
  */
+class UUserWidget;
 
 UCLASS()
 class HOOKMECHANICRUNTIME_API ULyraGameplayAbility_Hook : public ULyraGameplayAbility
@@ -42,6 +43,7 @@ protected:
 	UFUNCTION()
 	void OnInputPressed(float TimePassed);
 
+	// Client function to perform root motion 
 	UFUNCTION(Client, Reliable)
 	void Client_PerformHookMovement(const FVector& Location);
 
@@ -53,8 +55,12 @@ protected:
 	// Hook launch speed
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook")
 	float HookMaxSpeed = 1000.f;
+	
+	// Hook Ability Icon 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lyra|Hook|UI")
+	TSubclassOf<UUserWidget> AbilityWidgetClass;
 
-	// Icon 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Lyra|Hook|HUD")
-	//TSubclassOf<UUserWidget> HookIcon;
+	// Hook Ability Icon Extension Gameplay Tag 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Lyra|Hook|UI")
+	FGameplayTag AbilityWidgetExtensionTag;
 };
